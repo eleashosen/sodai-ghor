@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Couples Meals - Delicious Treats</title>
+    <title>Sodai Ghor - Delicious Treats</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -584,7 +584,7 @@
 </head>
 <body>
     <header>
-        <div class="logo">Couples Meals</div>
+        <div class="logo">Sodai Ghor</div>
         <div class="tagline">Sweet treats for loving couples</div>
         <button class="admin-toggle" id="admin-toggle">Admin Login</button>
     </header>
@@ -804,12 +804,12 @@
     </main>
     
     <footer>
-        <p>Follow us on Facebook: Couples Meals</p>
+        <p>Follow us on Facebook: Sodai Ghor</p>
         <div class="social-links">
             <a href="#" class="social-link">Facebook</a>
             <a href="#" class="social-link">Instagram</a>
         </div>
-        <p style="margin-top: 1rem;">&copy; 2023 Couples Meals. All rights reserved.</p>
+        <p style="margin-top: 1rem;">&copy; 2025 Sodai Ghor. All rights reserved.</p>
     </footer>
 
     <script>
@@ -1276,7 +1276,7 @@
             // Add header
             doc.setFontSize(20);
             doc.setTextColor(255, 107, 107);
-            doc.text('Couples Meals', 20, 30);
+            doc.text('Sodai Ghor', 20, 30);
             
             doc.setFontSize(12);
             doc.setTextColor(100, 100, 100);
@@ -1370,7 +1370,7 @@
                         `${item.name} x ${item.quantity} - ৳${(item.price * item.quantity).toFixed(2)}`
                     ).join('\n'),
                     customer_notes: order.customerNotes || 'No special instructions',
-                    from_name: 'Couples Meals Website'
+                    from_name: 'Sodai Ghor Website'
                 };
                 
                 // Send email
@@ -1554,7 +1554,7 @@
                 `${item.name} x ${item.quantity} - ৳${(item.price * item.quantity).toFixed(2)}`
             ).join('%0A');
             
-            const message = `New Order from Couples Meals Website%0A%0AOrder ID: ${order.id}%0ACustomer: ${customerName}%0APhone: ${customerPhone}%0AEmail: ${customerEmail || 'Not provided'}%0AAddress: ${customerAddress}%0A%0AItems:%0A${itemsText}%0A%0ATotal: ৳${order.total.toFixed(2)}%0A%0ANotes: ${customerNotes || 'None'}`;
+            const message = `New Order from Sodai Ghor Website%0A%0AOrder ID: ${order.id}%0ACustomer: ${customerName}%0APhone: ${customerPhone}%0AEmail: ${customerEmail || 'Not provided'}%0AAddress: ${customerAddress}%0A%0AItems:%0A${itemsText}%0A%0ATotal: ৳${order.total.toFixed(2)}%0A%0ANotes: ${customerNotes || 'None'}`;
             
             const whatsappUrl = `https://wa.me/?text=${message}`;
             
