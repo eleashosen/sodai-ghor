@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Couples Meals - Delicious Treats</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #ffa36b;
+            --accent: #ffd56b;
+            --light: #fff9f4;
+            --dark: #333333;
+            --success: #4CAF50;
+            --danger: #f44336;
+            --admin: #6b5bff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+        
+        .admin-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        nav {
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+        }
+        
+        .nav-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--light);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .admin-nav-item {
+            border-bottom-color: var(--admin);
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-image {
+            height: 200px;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--primary);
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .product-info {
+            padding: 1rem;
+        }
+        
+        .product-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-price {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .add-to-cart {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .add-to-cart:hover {
+            background-color: var(--secondary);
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-item-info {
+            flex-grow: 1;
+        }
+        
+        .cart-item-name {
+            font-weight: bold;
+        }
+        
+        .cart-item-price {
+            color: var(--primary);
+        }
+        
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .quantity-btn {
+            background-color: #f0f0f0;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .remove-btn {
+            background-color: #ffcccc;
+            color: #ff3333;
+            border: none;
+            padding: 0.3rem 0.7rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+        
+        .cart-total {
+            text-align: right;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-top: 2px solid #eee;
+            margin-top: 1rem;
+        }
+        
+        .checkout-btn, .place-order-btn {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            width: 100%;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .checkout-btn:hover, .place-order-btn:hover {
+            background-color: #3d8b40;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .order-summary {
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .order-status-item {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .order-id {
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .order-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-confirmed {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-cancelled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #777;
+        }
+        
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #ddd;
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+        }
+        
+        .social-links {
+            margin-top: 1rem;
+        }
+        
+        .social-link {
+            display: inline-block;
+            margin: 0 0.5rem;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        /* Admin Styles */
+        .admin-panel {
+            background-color: #f0f0f0;
+            border-left: 4px solid var(--admin);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-section {
+            display: none;
+        }
+        
+        .admin-section.active {
+            display: block;
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .admin-btn {
+            background-color: var(--admin);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .admin-btn:hover {
+            background-color: #5a4ae0;
+        }
+        
+        .admin-btn.danger {
+            background-color: var(--danger);
+        }
+        
+        .admin-btn.danger:hover {
+            background-color: #d32f2f;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .admin-table th, .admin-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .admin-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        
+        .admin-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .status-select {
+            padding: 0.3rem 0.5rem;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .login-form {
+            max-width: 400px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .login-btn {
+            background-color: var(--admin);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .login-btn:hover {
+            background-color: #5a4ae0;
+        }
+        
+        /* Image Upload Styles */
+        .image-upload-container {
+            margin-bottom: 1rem;
+        }
+        
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .image-preview-placeholder {
+            color: #999;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            background-color: #f0f0f0;
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 0.5rem;
+        }
+        
+        .file-input-label:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .currency {
+            font-size: 0.9rem;
+            color: #666;
+            margin-left: 0.5rem;
+        }
+        
+        .pdf-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 0.5rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .pdf-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .notification-settings {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+        
+        .test-notification-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .test-notification-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+            }
+            
+            .nav-item {
+                text-align: center;
+            }
+            
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .admin-actions {
+                flex-direction: column;
+            }
+            
+            .admin-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Couples Meals</div>
+        <div class="tagline">Sweet treats for loving couples</div>
+        <button class="admin-toggle" id="admin-toggle">Admin Login</button>
+    </header>
+    
+    <nav>
+        <ul class="nav-container">
+            <li class="nav-item active" data-target="products">Products</li>
+            <li class="nav-item" data-target="cart">Cart (<span id="cart-count">0</span>)</li>
+            <li class="nav-item" data-target="checkout">Checkout</li>
+            <li class="nav-item" data-target="order-status">Order Status</li>
+        </ul>
+    </nav>
+    
+    <main>
+        <!-- Products Section -->
+        <section id="products" class="section active">
+            <h2>Our Delicious Products</h2>
+            <div class="products-grid" id="products-grid">
+                <!-- Products will be dynamically added here -->
+            </div>
+        </section>
+        
+        <!-- Cart Section -->
+        <section id="cart" class="section">
+            <h2>Your Shopping Cart</h2>
+            <div id="cart-items">
+                <!-- Cart items will be dynamically added here -->
+            </div>
+            <div class="cart-total">
+                Total: ৳<span id="cart-total">0.00</span>
+            </div>
+            <button class="checkout-btn" id="proceed-to-checkout">Proceed to Checkout</button>
+        </section>
+        
+        <!-- Checkout Section -->
+        <section id="checkout" class="section">
+            <h2>Checkout</h2>
+            <form id="checkout-form">
+                <div class="form-group">
+                    <label for="customer-name">Full Name</label>
+                    <input type="text" id="customer-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-phone">Phone Number</label>
+                    <input type="tel" id="customer-phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer-email">Email Address (Optional)</label>
+                    <input type="email" id="customer-email">
+                </div>
+                <div class="form-group">
+                    <label for="customer-address">Delivery Address</label>
+                    <textarea id="customer-address" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="customer-notes">Special Instructions (Optional)</label>
+                    <textarea id="customer-notes" rows="3"></textarea>
+                </div>
+                
+                <div class="order-summary">
+                    <h3>Order Summary</h3>
+                    <div id="checkout-summary">
+                        <!-- Order summary will be dynamically added here -->
+                    </div>
+                    <div class="order-total" style="text-align: right; margin-top: 1rem; font-weight: bold;">
+                        Total: ৳<span id="checkout-total">0.00</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="place-order-btn">Place Order</button>
+            </form>
+        </section>
+        
+        <!-- Order Status Section -->
+        <section id="order-status" class="section">
+            <h2>Your Orders</h2>
+            <div id="orders-list">
+                <!-- Orders will be dynamically added here -->
+            </div>
+        </section>
+        
+        <!-- Admin Login Section -->
+        <section id="admin-login" class="section">
+            <div class="login-form">
+                <h2>Admin Login</h2>
+                <div class="form-group">
+                    <label for="admin-username">Username</label>
+                    <input type="text" id="admin-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Password</label>
+                    <input type="password" id="admin-password" required>
+                </div>
+                <button class="login-btn" id="admin-login-btn">Login</button>
+            </div>
+        </section>
+        
+        <!-- Admin Panel -->
+        <section id="admin-panel" class="section">
+            <div class="admin-panel">
+                <h2>Admin Dashboard</h2>
+                <div class="admin-actions">
+                    <button class="admin-btn" data-target="admin-products">Manage Products</button>
+                    <button class="admin-btn" data-target="admin-orders">Manage Orders</button>
+                    <button class="admin-btn" data-target="admin-notifications">Notifications</button>
+                    <button class="admin-btn danger" id="admin-logout">Logout</button>
+                </div>
+                
+                <!-- Admin Products Section -->
+                <div id="admin-products" class="admin-section active">
+                    <h3>Product Management</h3>
+                    <button class="admin-btn" id="add-product-btn">Add New Product</button>
+                    
+                    <div class="form-group" id="product-form" style="display: none; margin-top: 1rem; padding: 1rem; background: white; border-radius: 5px;">
+                        <h4 id="product-form-title">Add New Product</h4>
+                        <div class="form-group">
+                            <label for="product-name">Product Name</label>
+                            <input type="text" id="product-name">
+                        </div>
+                        <div class="form-group">
+                            <label for="product-price">Price <span class="currency">(BDT)</span></label>
+                            <input type="number" id="product-price" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="product-category">Category</label>
+                            <select id="product-category">
+                                <option value="honey">Honey</option>
+                                <option value="nuts">Nuts</option>
+                                <option value="honeynuts">Honey Nuts</option>
+                                <option value="sweet">Sweets</option>
+                                <option value="biscuits">Biscuits</option>
+                            </select>
+                        </div>
+                        <div class="form-group image-upload-container">
+                            <label>Product Image</label>
+                            <div class="image-preview" id="image-preview">
+                                <div class="image-preview-placeholder">No image selected</div>
+                            </div>
+                            <input type="file" id="product-image" class="file-input" accept="image/*">
+                            <label for="product-image" class="file-input-label">Choose Image</label>
+                        </div>
+                        <div class="form-group">
+                            <button class="admin-btn" id="save-product">Save Product</button>
+                            <button class="admin-btn danger" id="cancel-product">Cancel</button>
+                        </div>
+                    </div>
+                    
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Price (BDT)</th>
+                                <th>Category</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-products-list">
+                            <!-- Admin products will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Admin Orders Section -->
+                <div id="admin-orders" class="admin-section">
+                    <h3>Order Management</h3>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Phone</th>
+                                <th>Total (BDT)</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-orders-list">
+                            <!-- Admin orders will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Admin Notifications Section -->
+                <div id="admin-notifications" class="admin-section">
+                    <h3>Email Notifications</h3>
+                    <div class="notification-settings">
+                        <h4>Gmail Notification Settings</h4>
+                        <p>Configure your EmailJS settings to receive email notifications when orders are placed.</p>
+                        
+                        <div class="form-group">
+                            <label for="emailjs-service">EmailJS Service ID</label>
+                            <input type="text" id="emailjs-service" placeholder="service_xxxxxxxxx">
+                        </div>
+                        <div class="form-group">
+                            <label for="emailjs-template">EmailJS Template ID</label>
+                            <input type="text" id="emailjs-template" placeholder="template_xxxxxxxxx">
+                        </div>
+                        <div class="form-group">
+                            <label for="emailjs-public">EmailJS Public Key</label>
+                            <input type="text" id="emailjs-public" placeholder="user_xxxxxxxxx">
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-email">Your Email Address</label>
+                            <input type="email" id="admin-email" placeholder="your.email@gmail.com">
+                        </div>
+                        
+                        <button class="admin-btn" id="save-email-settings">Save Settings</button>
+                        <button class="test-notification-btn" id="test-notification">Send Test Notification</button>
+                        
+                        <div id="email-status" style="margin-top: 1rem; padding: 1rem; border-radius: 5px; display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <p>Follow us on Facebook: Couples Meals</p>
+        <div class="social-links">
+            <a href="#" class="social-link">Facebook</a>
+            <a href="#" class="social-link">Instagram</a>
+        </div>
+        <p style="margin-top: 1rem;">&copy; 2023 Couples Meals. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+
+        // Initialize EmailJS
+        (function(){
+            emailjs.init("user_xxxxxxxxx"); // Default public key
+        })();
+
+        // Sample product data
+        let products = JSON.parse(localStorage.getItem('products')) || [
+            { id: 1, name: "Pure Honey", price: 12.99, image: "", emoji: "🍯", category: "honey" },
+            { id: 2, name: "Mixed Nuts", price: 8.99, image: "", emoji: "🥜", category: "nuts" },
+            { id: 3, name: "Honey Coated Nuts", price: 15.99, image: "", emoji: "🍯🥜", category: "honeynuts" },
+            { id: 4, name: "Assorted Sweets", price: 6.99, image: "", emoji: "🍬", category: "sweet" },
+            { id: 5, name: "Homemade Biscuits", price: 5.99, image: "", emoji: "🍪", category: "biscuits" }
+        ];
+
+        // Initialize cart and orders
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        let isAdmin = false;
+        let editingProductId = null;
+
+        // EmailJS settings
+        let emailSettings = JSON.parse(localStorage.getItem('emailSettings')) || {
+            serviceId: '',
+            templateId: '',
+            publicKey: '',
+            adminEmail: ''
+        };
+
+        // DOM elements
+        const productsGrid = document.getElementById('products-grid');
+        const cartItems = document.getElementById('cart-items');
+        const cartTotal = document.getElementById('cart-total');
+        const cartCount = document.getElementById('cart-count');
+        const checkoutSummary = document.getElementById('checkout-summary');
+        const checkoutTotal = document.getElementById('checkout-total');
+        const ordersList = document.getElementById('orders-list');
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.section');
+        const checkoutForm = document.getElementById('checkout-form');
+        const proceedToCheckoutBtn = document.getElementById('proceed-to-checkout');
+        const adminToggle = document.getElementById('admin-toggle');
+        const adminLoginBtn = document.getElementById('admin-login-btn');
+        const adminLogoutBtn = document.getElementById('admin-logout');
+        const adminProductsList = document.getElementById('admin-products-list');
+        const adminOrdersList = document.getElementById('admin-orders-list');
+        const addProductBtn = document.getElementById('add-product-btn');
+        const productForm = document.getElementById('product-form');
+        const saveProductBtn = document.getElementById('save-product');
+        const cancelProductBtn = document.getElementById('cancel-product');
+        const adminSections = document.querySelectorAll('.admin-section');
+        const adminSectionBtns = document.querySelectorAll('.admin-btn[data-target]');
+        const productImageInput = document.getElementById('product-image');
+        const imagePreview = document.getElementById('image-preview');
+        const saveEmailSettingsBtn = document.getElementById('save-email-settings');
+        const testNotificationBtn = document.getElementById('test-notification');
+        const emailStatus = document.getElementById('email-status');
+
+        // Display products
+        function displayProducts() {
+            productsGrid.innerHTML = '';
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                
+                const imageStyle = product.image ? 
+                    `style="background-image: url('${product.image}')"` : 
+                    '';
+                
+                productCard.innerHTML = `
+                    <div class="product-image" ${imageStyle}>
+                        ${!product.image ? product.emoji : ''}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">৳${product.price.toFixed(2)}</div>
+                        <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
+                    </div>
+                `;
+                productsGrid.appendChild(productCard);
+            });
+            
+            // Add event listeners to add to cart buttons
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.getAttribute('data-id'));
+                    addToCart(productId);
+                });
+            });
+        }
+
+        // Add product to cart
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    emoji: product.emoji,
+                    image: product.image,
+                    quantity: 1
+                });
+            }
+            
+            updateCart();
+            saveCartToStorage();
+            
+            // Show notification
+            alert(`${product.name} added to cart!`);
+        }
+
+        // Update cart display
+        function updateCart() {
+            cartItems.innerHTML = '';
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <h3>Your cart is empty</h3>
+                        <p>Add some delicious products to get started!</p>
+                    </div>
+                `;
+                cartTotal.textContent = '0.00';
+                cartCount.textContent = '0';
+                return;
+            }
+            
+            let total = 0;
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                const cartItem = document.createElement('div');
+                cartItem.className = 'cart-item';
+                cartItem.innerHTML = `
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.emoji} ${item.name}</div>
+                        <div class="cart-item-price">৳${item.price.toFixed(2)} each</div>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn minus" data-id="${item.id}">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="quantity-btn plus" data-id="${item.id}">+</button>
+                    </div>
+                    <div class="cart-item-total">৳${itemTotal.toFixed(2)}</div>
+                    <button class="remove-btn" data-id="${item.id}">Remove</button>
+                `;
+                cartItems.appendChild(cartItem);
+            });
+            
+            cartTotal.textContent = total.toFixed(2);
+            cartCount.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            // Add event listeners to quantity buttons
+            document.querySelectorAll('.quantity-btn.plus').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.getAttribute('data-id'));
+                    updateQuantity(productId, 1);
+                });
+            });
+            
+            document.querySelectorAll('.quantity-btn.minus').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.getAttribute('data-id'));
+                    updateQuantity(productId, -1);
+                });
+            });
+            
+            document.querySelectorAll('.remove-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.getAttribute('data-id'));
+                    removeFromCart(productId);
+                });
+            });
+        }
+
+        // Update item quantity in cart
+        function updateQuantity(productId, change) {
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity += change;
+                
+                if (item.quantity <= 0) {
+                    removeFromCart(productId);
+                } else {
+                    updateCart();
+                    saveCartToStorage();
+                }
+            }
+        }
+
+        // Remove item from cart
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCart();
+            saveCartToStorage();
+        }
+
+        // Save cart to localStorage
+        function saveCartToStorage() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        // Update checkout summary
+        function updateCheckoutSummary() {
+            checkoutSummary.innerHTML = '';
+            
+            if (cart.length === 0) {
+                checkoutSummary.innerHTML = '<p>Your cart is empty</p>';
+                checkoutTotal.textContent = '0.00';
+                return;
+            }
+            
+            let total = 0;
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                const orderItem = document.createElement('div');
+                orderItem.className = 'order-item';
+                orderItem.innerHTML = `
+                    <span>${item.emoji} ${item.name} x ${item.quantity}</span>
+                    <span>৳${itemTotal.toFixed(2)}</span>
+                `;
+                checkoutSummary.appendChild(orderItem);
+            });
+            
+            checkoutTotal.textContent = total.toFixed(2);
+        }
+
+        // Display orders
+        function displayOrders() {
+            ordersList.innerHTML = '';
+            
+            if (orders.length === 0) {
+                ordersList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <h3>No orders yet</h3>
+                        <p>Your orders will appear here once you place them</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort orders by date (newest first)
+            orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Filter orders for current customer (in a real app, you'd have user authentication)
+            // For demo purposes, we'll show all orders
+            const customerOrders = orders;
+            
+            customerOrders.forEach(order => {
+                const orderItem = document.createElement('div');
+                orderItem.className = 'order-status-item';
+                
+                let statusClass = 'status-pending';
+                if (order.status === 'confirmed') statusClass = 'status-confirmed';
+                if (order.status === 'completed') statusClass = 'status-completed';
+                if (order.status === 'cancelled') statusClass = 'status-cancelled';
+                
+                orderItem.innerHTML = `
+                    <div class="order-header">
+                        <div class="order-id">Order #${order.id}</div>
+                        <div class="order-status ${statusClass}">${order.status}</div>
+                    </div>
+                    <div class="order-details">
+                        <p><strong>Customer:</strong> ${order.customerName}</p>
+                        <p><strong>Phone:</strong> ${order.customerPhone}</p>
+                        <p><strong>Address:</strong> ${order.customerAddress}</p>
+                        ${order.customerNotes ? `<p><strong>Notes:</strong> ${order.customerNotes}</p>` : ''}
+                        <div class="order-items" style="margin-top: 1rem;">
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    <span>${item.emoji} ${item.name} x ${item.quantity}</span>
+                                    <span>৳${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="order-total" style="text-align: right; margin-top: 1rem; font-weight: bold;">
+                            Total: ৳${order.total.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+                ordersList.appendChild(orderItem);
+            });
+        }
+
+        // Generate order ID
+        function generateOrderId() {
+            return 'CM' + Date.now().toString().slice(-6);
+        }
+
+        // Generate product ID
+        function generateProductId() {
+            return Math.max(0, ...products.map(p => p.id)) + 1;
+        }
+
+        // Display admin products
+        function displayAdminProducts() {
+            adminProductsList.innerHTML = '';
+            
+            products.forEach(product => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        ${product.image ? 
+                            `<img src="${product.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">` : 
+                            product.emoji}
+                    </td>
+                    <td>${product.name}</td>
+                    <td>৳${product.price.toFixed(2)}</td>
+                    <td>${product.category}</td>
+                    <td>
+                        <button class="admin-btn" data-id="${product.id}" data-action="edit">Edit</button>
+                        <button class="admin-btn danger" data-id="${product.id}" data-action="delete">Delete</button>
+                    </td>
+                `;
+                adminProductsList.appendChild(row);
+            });
+            
+            // Add event listeners to admin product buttons
+            document.querySelectorAll('#admin-products-list .admin-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.getAttribute('data-id'));
+                    const action = e.target.getAttribute('data-action');
+                    
+                    if (action === 'edit') {
+                        editProduct(productId);
+                    } else if (action === 'delete') {
+                        deleteProduct(productId);
+                    }
+                });
+            });
+        }
+
+        // Display admin orders
+        function displayAdminOrders() {
+            adminOrdersList.innerHTML = '';
+            
+            // Sort orders by date (newest first)
+            orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            orders.forEach(order => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customerName}</td>
+                    <td>${order.customerPhone}</td>
+                    <td>৳${order.total.toFixed(2)}</td>
+                    <td>
+                        <select class="status-select" data-id="${order.id}">
+                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completed</option>
+                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </td>
+                    <td>${new Date(order.date).toLocaleDateString()}</td>
+                    <td>
+                        <button class="admin-btn" data-id="${order.id}" data-action="view">View</button>
+                        <button class="pdf-btn" data-id="${order.id}" data-action="pdf">PDF</button>
+                    </td>
+                `;
+                adminOrdersList.appendChild(row);
+            });
+            
+            // Add event listeners to status selects
+            document.querySelectorAll('.status-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const orderId = e.target.getAttribute('data-id');
+                    updateOrderStatus(orderId, e.target.value);
+                });
+            });
+            
+            // Add event listeners to view buttons
+            document.querySelectorAll('#admin-orders-list .admin-btn[data-action="view"]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const orderId = e.target.getAttribute('data-id');
+                    viewOrder(orderId);
+                });
+            });
+            
+            // Add event listeners to PDF buttons
+            document.querySelectorAll('#admin-orders-list .pdf-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const orderId = e.target.getAttribute('data-id');
+                    generateOrderPDF(orderId);
+                });
+            });
+        }
+
+        // Edit product
+        function editProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                document.getElementById('product-name').value = product.name;
+                document.getElementById('product-price').value = product.price;
+                document.getElementById('product-category').value = product.category;
+                
+                // Set image preview
+                if (product.image) {
+                    imagePreview.innerHTML = `<img src="${product.image}" alt="${product.name}">`;
+                } else {
+                    imagePreview.innerHTML = '<div class="image-preview-placeholder">No image selected</div>';
+                }
+                
+                document.getElementById('product-form-title').textContent = 'Edit Product';
+                productForm.style.display = 'block';
+                editingProductId = productId;
+            }
+        }
+
+        // Delete product
+        function deleteProduct(productId) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                products = products.filter(p => p.id !== productId);
+                saveProductsToStorage();
+                displayProducts();
+                displayAdminProducts();
+            }
+        }
+
+        // Update order status
+        function updateOrderStatus(orderId, status) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = status;
+                localStorage.setItem('orders', JSON.stringify(orders));
+                displayOrders();
+            }
+        }
+
+        // View order details
+        function viewOrder(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                let itemsText = order.items.map(item => 
+                    `${item.name} x ${item.quantity} - ৳${(item.price * item.quantity).toFixed(2)}`
+                ).join('\n');
+                
+                alert(`Order Details:\n\nOrder ID: ${order.id}\nCustomer: ${order.customerName}\nPhone: ${order.customerPhone}\nAddress: ${order.customerAddress}\nStatus: ${order.status}\n\nItems:\n${itemsText}\n\nTotal: ৳${order.total.toFixed(2)}\n\nNotes: ${order.customerNotes || 'None'}`);
+            }
+        }
+
+        // Generate PDF for order
+        function generateOrderPDF(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            const doc = new jsPDF();
+            
+            // Add header
+            doc.setFontSize(20);
+            doc.setTextColor(255, 107, 107);
+            doc.text('Couples Meals', 20, 30);
+            
+            doc.setFontSize(12);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Sweet treats for loving couples', 20, 40);
+            
+            // Add order details
+            doc.setFontSize(16);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Order #${order.id}`, 20, 60);
+            
+            doc.setFontSize(12);
+            doc.text(`Date: ${new Date(order.date).toLocaleDateString()}`, 20, 70);
+            doc.text(`Status: ${order.status}`, 20, 80);
+            
+            // Customer information
+            doc.text('Customer Information:', 20, 100);
+            doc.text(`Name: ${order.customerName}`, 20, 110);
+            doc.text(`Phone: ${order.customerPhone}`, 20, 120);
+            doc.text(`Address: ${order.customerAddress}`, 20, 130);
+            
+            if (order.customerNotes) {
+                doc.text(`Notes: ${order.customerNotes}`, 20, 140);
+            }
+            
+            // Order items
+            doc.text('Order Items:', 20, 160);
+            
+            let yPosition = 170;
+            order.items.forEach((item, index) => {
+                if (yPosition > 250) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                doc.text(`${item.name} x ${item.quantity}`, 20, yPosition);
+                doc.text(`৳${(item.price * item.quantity).toFixed(2)}`, 180, yPosition);
+                yPosition += 10;
+            });
+            
+            // Total
+            yPosition += 10;
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text(`Total: ৳${order.total.toFixed(2)}`, 20, yPosition);
+            
+            // Save the PDF with customer name as filename
+            const fileName = `${order.customerName.replace(/\s+/g, '_')}_Order_${order.id}.pdf`;
+            doc.save(fileName);
+        }
+
+        // Save products to localStorage
+        function saveProductsToStorage() {
+            localStorage.setItem('products', JSON.stringify(products));
+        }
+
+        // Handle image upload
+        productImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.innerHTML = `<img src="${e.target.result}" alt="Product Image">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Send email notification
+        async function sendOrderNotification(order) {
+            // Check if email settings are configured
+            if (!emailSettings.serviceId || !emailSettings.templateId || !emailSettings.adminEmail) {
+                console.log('Email settings not configured');
+                return false;
+            }
+            
+            try {
+                // Initialize EmailJS with the saved public key
+                emailjs.init(emailSettings.publicKey);
+                
+                // Prepare email parameters
+                const templateParams = {
+                    to_email: emailSettings.adminEmail,
+                    order_id: order.id,
+                    customer_name: order.customerName,
+                    customer_phone: order.customerPhone,
+                    customer_email: order.customerEmail || 'Not provided',
+                    customer_address: order.customerAddress,
+                    order_date: new Date(order.date).toLocaleDateString(),
+                    order_total: `৳${order.total.toFixed(2)}`,
+                    order_items: order.items.map(item => 
+                        `${item.name} x ${item.quantity} - ৳${(item.price * item.quantity).toFixed(2)}`
+                    ).join('\n'),
+                    customer_notes: order.customerNotes || 'No special instructions',
+                    from_name: 'Couples Meals Website'
+                };
+                
+                // Send email
+                const response = await emailjs.send(
+                    emailSettings.serviceId,
+                    emailSettings.templateId,
+                    templateParams
+                );
+                
+                console.log('Email sent successfully:', response);
+                return true;
+            } catch (error) {
+                console.error('Failed to send email:', error);
+                return false;
+            }
+        }
+
+        // Save email settings
+        function saveEmailSettings() {
+            emailSettings.serviceId = document.getElementById('emailjs-service').value;
+            emailSettings.templateId = document.getElementById('emailjs-template').value;
+            emailSettings.publicKey = document.getElementById('emailjs-public').value;
+            emailSettings.adminEmail = document.getElementById('admin-email').value;
+            
+            localStorage.setItem('emailSettings', JSON.stringify(emailSettings));
+            
+            showEmailStatus('Email settings saved successfully!', 'success');
+        }
+
+        // Test email notification
+        async function testEmailNotification() {
+            if (!emailSettings.serviceId || !emailSettings.templateId || !emailSettings.adminEmail) {
+                showEmailStatus('Please configure all email settings first.', 'error');
+                return;
+            }
+            
+            showEmailStatus('Sending test email...', 'info');
+            
+            const testOrder = {
+                id: 'TEST123',
+                customerName: 'Test Customer',
+                customerPhone: '0123456789',
+                customerEmail: 'test@example.com',
+                customerAddress: 'Test Address',
+                date: new Date().toISOString(),
+                total: 99.99,
+                items: [
+                    { name: 'Test Product', quantity: 2, price: 49.99 }
+                ],
+                customerNotes: 'This is a test order'
+            };
+            
+            const success = await sendOrderNotification(testOrder);
+            
+            if (success) {
+                showEmailStatus('Test email sent successfully! Check your inbox.', 'success');
+            } else {
+                showEmailStatus('Failed to send test email. Please check your settings.', 'error');
+            }
+        }
+
+        // Show email status
+        function showEmailStatus(message, type) {
+            emailStatus.textContent = message;
+            emailStatus.style.display = 'block';
+            
+            if (type === 'success') {
+                emailStatus.style.backgroundColor = '#d4edda';
+                emailStatus.style.color = '#155724';
+                emailStatus.style.border = '1px solid #c3e6cb';
+            } else if (type === 'error') {
+                emailStatus.style.backgroundColor = '#f8d7da';
+                emailStatus.style.color = '#721c24';
+                emailStatus.style.border = '1px solid #f5c6cb';
+            } else {
+                emailStatus.style.backgroundColor = '#d1ecf1';
+                emailStatus.style.color = '#0c5460';
+                emailStatus.style.border = '1px solid #bee5eb';
+            }
+        }
+
+        // Load email settings into form
+        function loadEmailSettings() {
+            document.getElementById('emailjs-service').value = emailSettings.serviceId;
+            document.getElementById('emailjs-template').value = emailSettings.templateId;
+            document.getElementById('emailjs-public').value = emailSettings.publicKey;
+            document.getElementById('admin-email').value = emailSettings.adminEmail;
+        }
+
+        // Navigation
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const target = item.getAttribute('data-target');
+                
+                // Update active nav item
+                navItems.forEach(navItem => navItem.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Show target section
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === target) {
+                        section.classList.add('active');
+                        
+                        // Update specific sections when shown
+                        if (target === 'cart') {
+                            updateCart();
+                        } else if (target === 'checkout') {
+                            updateCheckoutSummary();
+                        } else if (target === 'order-status') {
+                            displayOrders();
+                        }
+                    }
+                });
+            });
+        });
+
+        // Proceed to checkout button
+        proceedToCheckoutBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert('Your cart is empty. Add some products first!');
+                return;
+            }
+            
+            // Switch to checkout section
+            navItems.forEach(navItem => navItem.classList.remove('active'));
+            document.querySelector('[data-target="checkout"]').classList.add('active');
+            
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === 'checkout') {
+                    section.classList.add('active');
+                    updateCheckoutSummary();
+                }
+            });
+        });
+
+        // Checkout form submission
+        checkoutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (cart.length === 0) {
+                alert('Your cart is empty. Add some products first!');
+                return;
+            }
+            
+            const customerName = document.getElementById('customer-name').value;
+            const customerPhone = document.getElementById('customer-phone').value;
+            const customerEmail = document.getElementById('customer-email').value;
+            const customerAddress = document.getElementById('customer-address').value;
+            const customerNotes = document.getElementById('customer-notes').value;
+            
+            // Create order
+            const order = {
+                id: generateOrderId(),
+                date: new Date().toISOString(),
+                customerName,
+                customerPhone,
+                customerEmail,
+                customerAddress,
+                customerNotes,
+                items: [...cart],
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                status: 'pending'
+            };
+            
+            // Add to orders
+            orders.push(order);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            
+            // Send email notification
+            const emailSent = await sendOrderNotification(order);
+            
+            // Clear cart
+            cart = [];
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+            
+            // Prepare WhatsApp message
+            const itemsText = order.items.map(item => 
+                `${item.name} x ${item.quantity} - ৳${(item.price * item.quantity).toFixed(2)}`
+            ).join('%0A');
+            
+            const message = `New Order from Couples Meals Website%0A%0AOrder ID: ${order.id}%0ACustomer: ${customerName}%0APhone: ${customerPhone}%0AEmail: ${customerEmail || 'Not provided'}%0AAddress: ${customerAddress}%0A%0AItems:%0A${itemsText}%0A%0ATotal: ৳${order.total.toFixed(2)}%0A%0ANotes: ${customerNotes || 'None'}`;
+            
+            const whatsappUrl = `https://wa.me/?text=${message}`;
+            
+            // Reset form
+            checkoutForm.reset();
+            
+            // Show success message
+            let successMessage = `Order placed successfully! Your order ID is ${order.id}. We will contact you soon.`;
+            if (emailSent) {
+                successMessage += ' Email notification sent to admin.';
+            }
+            alert(successMessage);
+            
+            // Redirect to order status
+            navItems.forEach(navItem => navItem.classList.remove('active'));
+            document.querySelector('[data-target="order-status"]').classList.add('active');
+            
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === 'order-status') {
+                    section.classList.add('active');
+                    displayOrders();
+                }
+            });
+            
+            // Update admin orders if admin is logged in
+            if (isAdmin) {
+                displayAdminOrders();
+            }
+            
+            // Open WhatsApp in a new tab (commented out to avoid automatic popup)
+            // window.open(whatsappUrl, '_blank');
+        });
+
+        // Admin toggle
+        adminToggle.addEventListener('click', () => {
+            if (isAdmin) {
+                // If already admin, show admin panel
+                showAdminPanel();
+            } else {
+                // Otherwise, show login form
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === 'admin-login') {
+                        section.classList.add('active');
+                    }
+                });
+            }
+        });
+
+        // Admin login
+        adminLoginBtn.addEventListener('click', () => {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            
+            // Simple authentication (in a real app, this would be more secure)
+            if (username === 'admin' && password === 'admin123') {
+                isAdmin = true;
+                showAdminPanel();
+            } else {
+                alert('Invalid username or password');
+            }
+        });
+
+        // Admin logout
+        adminLogoutBtn.addEventListener('click', () => {
+            isAdmin = false;
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === 'products') {
+                    section.classList.add('active');
+                }
+            });
+            
+            navItems.forEach(navItem => navItem.classList.remove('active'));
+            document.querySelector('[data-target="products"]').classList.add('active');
+            
+            adminToggle.textContent = 'Admin Login';
+        });
+
+        // Show admin panel
+        function showAdminPanel() {
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === 'admin-panel') {
+                    section.classList.add('active');
+                }
+            });
+            
+            adminToggle.textContent = 'Admin Mode';
+            displayAdminProducts();
+            displayAdminOrders();
+            loadEmailSettings();
+        }
+
+        // Add product button
+        addProductBtn.addEventListener('click', () => {
+            document.getElementById('product-form-title').textContent = 'Add New Product';
+            productForm.style.display = 'block';
+            editingProductId = null;
+            
+            // Clear form
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-price').value = '';
+            document.getElementById('product-category').value = 'honey';
+            imagePreview.innerHTML = '<div class="image-preview-placeholder">No image selected</div>';
+            productImageInput.value = '';
+        });
+
+        // Save product
+        saveProductBtn.addEventListener('click', () => {
+            const name = document.getElementById('product-name').value;
+            const price = parseFloat(document.getElementById('product-price').value);
+            const category = document.getElementById('product-category').value;
+            const image = imagePreview.querySelector('img') ? imagePreview.querySelector('img').src : '';
+            
+            if (!name || !price) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            if (editingProductId) {
+                // Update existing product
+                const product = products.find(p => p.id === editingProductId);
+                if (product) {
+                    product.name = name;
+                    product.price = price;
+                    product.category = category;
+                    product.image = image;
+                }
+            } else {
+                // Add new product
+                products.push({
+                    id: generateProductId(),
+                    name,
+                    price,
+                    category,
+                    image,
+                    emoji: '' // No emoji when using image
+                });
+            }
+            
+            saveProductsToStorage();
+            displayProducts();
+            displayAdminProducts();
+            
+            // Hide form
+            productForm.style.display = 'none';
+            editingProductId = null;
+        });
+
+        // Cancel product form
+        cancelProductBtn.addEventListener('click', () => {
+            productForm.style.display = 'none';
+            editingProductId = null;
+        });
+
+        // Admin section navigation
+        adminSectionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-target');
+                
+                // Update active admin section
+                adminSections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === target) {
+                        section.classList.add('active');
+                    }
+                });
+                
+                // Update specific sections when shown
+                if (target === 'admin-orders') {
+                    displayAdminOrders();
+                } else if (target === 'admin-notifications') {
+                    loadEmailSettings();
+                }
+            });
+        });
+
+        // Save email settings button
+        saveEmailSettingsBtn.addEventListener('click', saveEmailSettings);
+
+        // Test notification button
+        testNotificationBtn.addEventListener('click', testEmailNotification);
+
+        // Initialize the app
+        function init() {
+            displayProducts();
+            updateCart();
+            displayOrders();
+            loadEmailSettings();
+        }
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>
